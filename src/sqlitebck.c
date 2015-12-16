@@ -75,7 +75,7 @@ copy_database(sqlite3 *db_to, sqlite3 *db_from) {
 static int
 is_sqlite_type(PyTypeObject *tp)
 {
-    return strcmp(tp->tp_name, "sqlite3.Connection") == 0;
+    return strcmp(tp->tp_name, "sqlite3.Connection") == 0 || strcmp(tp->tp_name, "pysqlite2.dbapi2.Connection") == 0;
 }
 
 static int
@@ -140,7 +140,9 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
                 "Database in transaction");
         return NULL;
     }
+    Py_BEGIN_ALLOW_THREADS
     rc = copy_database(db_dest, db_source);
+    Py_END_ALLOW_THREADS
     if (rc != SQLITE_OK) {
         PyErr_Format(
                 ((pysqlite_Connection *)db_dest_conn)->DatabaseError,
